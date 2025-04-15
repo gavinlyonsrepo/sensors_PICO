@@ -10,7 +10,7 @@
  */
 
 #include "pico/stdlib.h"
-#include "../include/lm75/lm75.hpp"
+#include "../../include/lm75/lm75.hpp"
 
 
 // Constructor
