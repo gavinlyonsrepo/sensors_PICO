@@ -43,7 +43,7 @@ private:
 	
 	uint8_t ReadDataByte(void);
 
-	// Commications delays page 6 datasheet at link in URL
+	// Communications delays page 6 datasheet at link in URL
 	// Start Signal
 	const uint16_t StartSignalOne =   18;  /**< mS at least 18mS */
 	const uint16_t StartSignalTwo =   30;  /**< uS 20-40uS */

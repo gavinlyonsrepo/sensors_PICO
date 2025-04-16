@@ -21,7 +21,7 @@ C++ Library to support sensors for the Raspberry PI PICO. [URL project github li
 	1. Raspberry pi PICO RP2040
 	2. SDK(1.4.0) C++20
 	3. compiler G++ for arm-none-eabi((15:10.3-2021.07-4) 
-	4. CMAKE(VERSION 3.18) , VScode(1.84.2)
+	4. CMAKE(VERSION 3.20) , VScode(1.84.2)
 	5. Linux Mint 22.1
 
 ## Documentation
@@ -30,6 +30,7 @@ C++ Library to support sensors for the Raspberry PI PICO. [URL project github li
 
 | Component name | Type | Interface | Readme URL link |
 | -------- | ---------- | --------- | ---------- |
+|LM35|Sensor Temperature   | ADC | [Readme](extra/doc/lm35/README.md)|
 |LM75A|Sensor Temperature   | I2C | [Readme](extra/doc/lm75/README.md)|
 |DHT11|Sensor Temperature & Humidity | GPIO | [Readme](extra/doc/dht11/README.md)|
 |AHT10|Sensor Temperature & Humidity | I2C | [Readme](extra/doc/ahtxx/README.md)|
