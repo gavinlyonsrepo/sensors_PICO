@@ -1,21 +1,20 @@
-/*
- * Project Name: library for Aosong ASAIR AHT10, 
- AHT15 AHT20 Digital Humidity & Temperature Sensor
- * File: ahtxx.cpp
- * Description: library Source file
- * See URL for full details.
- * URL: https://github.com/gavinlyonsrepo/AHTXX_PICO
+/*!
+ * @file ahtxx.cpp
+ * @brief library for Aosong ASAIR AHT10,
+ *        AHT15 AHT20 Digital Humidity & Temperature Sensor
+ *        library implementation file
  */
 
 #include "../../include/ahtxx/ahtxx.hpp"
 
-// Constructor Desc init the sensor data types call before begin()
-// Param 1 : I2C address
-// Param 2 : IC2 interface , ic20 or i2c1 
-// Param 3 : Data pin I2C
-// Param 4 : Clock pin I2C
-// Param 5 : I2C Clock speed in Khz 0-400Khz
-
+/*! 
+	@brief Constructor for LIB_AHTXX class, init the sensor data types call before begin()
+	@param address I2C address of the device (7-bit)
+	@param i2c_type I2C instance of port IC20 or I2C1
+	@param SDApin I2C Data pin
+	@param SCLKpin I2C Clock pin
+	@param CLKspeed I2C Bus Clock speed in KHz. Typically 100-400
+*/
 LIB_AHTXX::LIB_AHTXX(uint8_t address, i2c_inst_t* i2c_type, uint8_t  SDApin, uint8_t  SCLKpin, uint16_t CLKspeed) {
 	_address = address;
 	 i2c = i2c_type; 
@@ -24,10 +23,11 @@ LIB_AHTXX::LIB_AHTXX(uint8_t address, i2c_inst_t* i2c_type, uint8_t  SDApin, uin
     _CLKSpeed = CLKspeed;
 }
 
-// Function Desc Initialise the I2C
-// Param 1 :: Enum with Sensor types
-// NOTE :: call before begin method
-
+/*!
+	 * @brief Initialize the I2C interface for the AHT10 sensor
+	 * @param sensorName The type of ASAIR I2C sensor being used
+	 * @note This function must be called before using the sensor begin method
+*/
 void LIB_AHTXX::AHT10_InitI2C(ASAIR_I2C_SENSOR_e sensorName) {
 	_sensorName = sensorName;
 	//init I2C
@@ -38,8 +38,11 @@ void LIB_AHTXX::AHT10_InitI2C(ASAIR_I2C_SENSOR_e sensorName) {
 	i2c_init(i2c, _CLKSpeed * 1000);
 }
 
- // Function desc: Initialize I2C & configure the sensor, call this function before
- // Returns bool true init success False failure
+ /*! 
+ 	@brief Initialize I2C & configure the sensor, call this function before
+ 	@note This function must be called before using the sensor begin method
+ 	@return bool true init success False failure
+ */
 
 bool LIB_AHTXX::AHT10_begin()
 {
@@ -52,10 +55,10 @@ bool LIB_AHTXX::AHT10_begin()
 	return isConnected; 
 }
 
-
-//  Function Desc :: readRawData()  Read raw measurement data from sensor over I2C
-//  Returns AHT10_ERROR for failure, true for success with data in the buffer
-
+/*!
+ * @brief Read raw measurement data from sensor over I2C
+ * @return uint8_t AHT10_ERROR for failure, true for success with data in the buffer
+ */
 uint8_t LIB_AHTXX::AHT10_readRawData() {
 
 	uint8_t bufTX[3];
@@ -82,14 +85,15 @@ uint8_t LIB_AHTXX::AHT10_readRawData() {
 	return true;
 }
 
-// Function Desc:  readTemperature() Read temperature, °C
-// Param1 readI2C  use last data or new
-// Returns: failure  AHT10_ERROR ,  success temperature as floating point
-// NOTES:
-// temperature range      -40°C..+80°C
-// temperature resolution 0.01°C
-// temperature accuracy   ±0.3°C
-
+/*!
+ * @brief Read temperature, °C
+ * @param readI2C use last data or new
+ * @return failure  AHT10_ERROR ,  success temperature as floating point
+ * NOTES:
+ * temperature range      -40°C..+80°C
+ * temperature resolution 0.01°C
+ * temperature accuracy   ±0.3°C
+*/
 float LIB_AHTXX::AHT10_readTemperature(bool readI2C) {
 	if (readI2C == AHT10_FORCE_READ_DATA) {
 		if (AHT10_readRawData() == AHT10_ERROR)
@@ -105,15 +109,15 @@ float LIB_AHTXX::AHT10_readTemperature(bool readI2C) {
 	return (float)(temperature * 0.000191 - 50);
 }
 
-
-// Function Desc :  readHumidity()  Read relative humidity, %
-// Param1 readI2C  use last data or new
-// Returns: failure  AHT10_ERROR ,  success humidity as floating point
-// NOTES
-// - relative humidity range      0%..100%
-//- relative humidity resolution 0.024%
-// - relative humidity accuracy   ±2%
-
+/*!
+ * @brief Read humidity, %
+ * @param readI2C use last data or new
+ * @return failure  AHT10_ERROR ,  success humidity as floating point
+ * NOTES:
+ * relative humidity range      0%..100%
+ * relative humidity resolution 0.024%
+ * relative humidity accuracy   ±2%
+*/
 float LIB_AHTXX::AHT10_readHumidity(bool readI2C) {
 	if (readI2C == AHT10_FORCE_READ_DATA) {
 		if (AHT10_readRawData() == AHT10_ERROR)
@@ -135,15 +139,15 @@ float LIB_AHTXX::AHT10_readHumidity(bool readI2C) {
 	return humidity;
 }
 
-
-// Function Desc:  softReset() Restart sensor, without power off
-// Return: failure  AHT10_ERROR ,  success output of  AHT10_enableFactoryCalCoeff()
-// NOTE:
-// - takes ~20ms
-// - all registers restores to default
-
+/*!
+ * @brief Soft reset the AHT10 sensor
+ * @return bool true for success, false for failure
+ * @note This function resets the sensor without power cycling it.
+ *       It takes approximately 20ms to complete.
+ *       All registers are restored to default values.
+ */
 bool LIB_AHTXX::AHT10_softReset(void) {
-	//MX_I2C1_Init;
+
 	uint8_t bufTX[1];
 	bufTX[0]= AHT10_SOFT_RESET_CMD;
 
@@ -157,9 +161,10 @@ bool LIB_AHTXX::AHT10_softReset(void) {
 }
 
 
-// Function Desc setNormalMode() Set normal measurement mode
-// Returns True for success , false for failure
-
+/*!
+ * @brief Set normal measurement mode for the AHT10 sensor
+ * @return bool true for success, false for failure
+*/
 bool LIB_AHTXX::AHT10_setNormalMode(void) {
 	uint8_t bufTX[3];
 
@@ -176,9 +181,11 @@ bool LIB_AHTXX::AHT10_setNormalMode(void) {
 	return true;
 }
 
-
-// Function Desc  setCycleMode(),  Set cycle measurement, mode continuous measurement
-// Returns True for success , false for failure
+/*!
+	@brief Set cycle measurement mode for the AHT10 sensor
+	@note This function configures the sensor for continuous measurement mode.
+	@return bool true for success, false for failure
+*/
 bool LIB_AHTXX::AHT10_setCycleMode(void) {
 	uint8_t bufTX[3];
 
@@ -197,10 +204,10 @@ bool LIB_AHTXX::AHT10_setCycleMode(void) {
 	return true;
 }
 
-
-// Function Desc :  readStatusByte() , Read status byte from sensor over I2C
-// Returns Status byte success or AHT10_ERROR failure
-
+/*! 
+ * @brief Read status byte from sensor over I2C
+ * @return Status byte success or AHT10_ERROR failure
+ */
 uint8_t LIB_AHTXX::AHT10_readStatusByte() {
 
 	returnValue = i2c_read_timeout_us(i2c, _address, _rawDataBuffer, 1 ,false, AHT10_MY_I2C_DELAY );
@@ -214,14 +221,14 @@ uint8_t LIB_AHTXX::AHT10_readStatusByte() {
 
 }
 
-
-// Function Desc :getCalibrationBit(),  Read Calibration bit from status byte
-// Param1 readI2C  use last data or force new read
-// Returns The calibration bit for success or AHT10_ERROR for error
-// NOTES:
-// - 0, factory calibration coeff disabled
-// - 1, factory calibration coeff loaded
-
+/*!
+ * @brief Read Calibration bit from status byte
+ * @param readI2C use last data or force new read
+ * @return The calibration bit for success or AHT10_ERROR for error
+ * @note 
+ * 	- 0, factory calibration coeff disabled
+ * 	- 1, factory calibration coeff loaded
+ */
 uint8_t LIB_AHTXX::AHT10_getCalibrationBit(bool readI2C) {
 	uint8_t valueBit;
 	if (readI2C == AHT10_FORCE_READ_DATA)
@@ -236,10 +243,11 @@ uint8_t LIB_AHTXX::AHT10_getCalibrationBit(bool readI2C) {
 	}
 }
 
-
-// Function Desc : enableFactoryCalCoeff() , Load factory calibration coefficients
-// returns true for success, false for failure
-
+/*!
+ * @brief Enable factory calibration coefficients
+ * @return bool true for success, false for failure
+ * @note This function loads the factory calibration coefficients into the sensor.
+*/
 bool LIB_AHTXX::AHT10_enableFactoryCalCoeff() {
 
 	uint8_t bufTX[3];
@@ -268,13 +276,14 @@ bool LIB_AHTXX::AHT10_enableFactoryCalCoeff() {
 
 }
 
-// Function Desc : getBusyBit(),  Read busy bit from status byte
-// Param1 readI2C  use last data or force new read
-// Returns busy bit for success or AHT10_ERROR for failure
-// NOTES:
-// - 0, sensor idle & sleeping
-// - 1, sensor busy & in measurement state
-
+/*!
+ * @brief Read busy bit from status byte
+ * @param readI2C use last data or force new read
+ * @return The busy bit for success or AHT10_ERROR for error
+ * @note 
+ * 	- 0, sensor idle & sleeping
+ * 	- 1, sensor busy & in measurement state
+*/
 uint8_t LIB_AHTXX::AHT10_getBusyBit(bool readI2C) {
 	uint8_t valueBit;
 	if (readI2C == AHT10_FORCE_READ_DATA)
@@ -290,7 +299,9 @@ uint8_t LIB_AHTXX::AHT10_getBusyBit(bool readI2C) {
 	}
 }
 
-
+/*!
+ * @brief De-initialize the AHT10 sensor
+*/
 void LIB_AHTXX::AHT10_DeInit()
 {
 	gpio_set_function(_SDataPin, GPIO_FUNC_NULL);
@@ -298,11 +309,19 @@ void LIB_AHTXX::AHT10_DeInit()
 	i2c_deinit(i2c); 	
 }
 
+/*!
+ * @brief Set the connection status of the AHT10 sensor
+ * @param connected The connection status to set
+*/
 void LIB_AHTXX::AHT10_SetIsConnected(bool connected)
 {
 	isConnected = connected;
 }
 
+/*!
+ * @brief Get the connection status of the AHT10 sensor
+ * @return bool The connection status
+*/
 bool LIB_AHTXX::AHT10_GetIsConnected(void)
 {
 	return isConnected;

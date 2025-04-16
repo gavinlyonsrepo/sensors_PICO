@@ -1,13 +1,12 @@
-/*
- * Project Name: library for Aosong ASAIR AHT10, 
-   AHT15 AHT20 Digital Humidity & Temperature Sensor
- * File: main.cpp
- * Description: main test file for AHT-XX library 
- * IDE:  Rpi PICO rp2040 C++
- * Created November 2022
- * Description: See URL for full details.
- * URL: https://github.com/gavinlyonsrepo/AHTXX_PICO
+/*!
+ * @file main.cpp
+ * @brief  library for Aosong ASAIR AHT10, 
+	AHT15 AHT20 Digital Humidity & Temperature Sensor
+	main test file for AHT-XX library , Rpi PICO rp2040 C++
+ * @date November 2022
+ * @link https://github.com/gavinlyonsrepo/sensors_PICO
  */
+
 
 #include <stdio.h>
 #include "pico/stdlib.h"
@@ -59,6 +58,3 @@ int main(void) {
 	}
 
 }
-
-
-/***END OF FILE****/
