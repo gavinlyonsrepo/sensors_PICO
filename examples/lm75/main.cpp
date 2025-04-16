@@ -1,12 +1,11 @@
-/*
- * Project Name: Library for the LM75A temperature sensor by NXP and Texas Instruments.
- * File: main.cpp
- * Description: main test file for lm75 library ::  two modes LIB_BASIC LIB_TEST
- * Author: Gavin Lyons.
- * IDE:  Rpi=PICo rp2040 C++
- * Created Sep 2022
- * Description: See URL for full details.
- * URL: https://github.com/gavinlyonsrepo/RPI_PICO_projects_list
+/*!
+ * @file main.cpp
+ * @brief main test file for lm75 library :: two modes LIB_BASIC or LIB_TEST, see mode select
+ * @details This example test file demonstrates the use of the LM75A temperature sensor library.
+ *          This example is for the Raspberry Pi Pico  microcontroller.
+ * @author Gavin Lyons.
+ * @date Sep 2022
+ * @link  https://github.com/gavinlyonsrepo/RPI_PICO_projects_list
  */
 
 // *** Libraries ***
