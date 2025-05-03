@@ -19,10 +19,17 @@ add_compile_options(-Wall -Wextra )
 string(APPEND CMAKE_EXE_LINKER_FLAGS "-Wl,--print-memory-usage")
 
 # Tell CMake where to find the executable source file
-add_executable(${PROJECT_NAME} 
-  examples/lm35/main.cpp
+add_executable(${PROJECT_NAME}
+
+  examples/bmp280/SPI_Normal/main.cpp 
+  #examples/bmp280/SPI_Forced/main.cpp 
+
+  #examples/lm35/main.cpp
+
   #examples/lm75/main.cpp
+
   #examples/ahtxx/main.cpp
+
   #examples/dht11/main.cpp
 )
 
@@ -32,6 +39,7 @@ pico_add_extra_outputs(${PROJECT_NAME})
 add_library(pico_sensors INTERFACE)
 
 target_sources(pico_sensors INTERFACE
+  ${CMAKE_CURRENT_LIST_DIR}/src/bmp280/bmp280.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/lm35/lm35.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/lm75/lm75.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/ahtxx/ahtxx.cpp
@@ -41,7 +49,7 @@ target_sources(pico_sensors INTERFACE
 target_include_directories(pico_sensors INTERFACE ${CMAKE_CURRENT_LIST_DIR}/include)
 
 # Pull in pico libraries that we need
-target_link_libraries(${PROJECT_NAME} pico_stdlib hardware_adc hardware_i2c pico_sensors )
+target_link_libraries(${PROJECT_NAME} pico_stdlib hardware_adc hardware_spi hardware_i2c pico_sensors )
 
 
 # Enable usb output, disable uart output

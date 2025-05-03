@@ -30,7 +30,8 @@ C++ Library to support sensors for the Raspberry PI PICO. [URL project github li
 
 | Component name | Type | Interface | Readme URL link |
 | -------- | ---------- | --------- | ---------- |
-|LM35|Sensor Temperature   | ADC | [Readme](extra/doc/lm35/README.md)|
-|LM75A|Sensor Temperature   | I2C | [Readme](extra/doc/lm75/README.md)|
-|DHT11|Sensor Temperature & Humidity | GPIO | [Readme](extra/doc/dht11/README.md)|
-|AHT10|Sensor Temperature & Humidity | I2C | [Readme](extra/doc/ahtxx/README.md)|
+|LM35|Temperature   | ADC | [Readme](extra/doc/lm35/README.md)|
+|LM75A|Temperature   | I2C | [Readme](extra/doc/lm75/README.md)|
+|DHT11| Humidity | GPIO | [Readme](extra/doc/dht11/README.md)|
+|AHT10| Humidity | I2C | [Readme](extra/doc/ahtxx/README.md)|
+|BMP280 | Pressure | [Readme](extra/doc/bmp280/README.md)|

@@ -18,9 +18,9 @@
 LIB_AHTXX::LIB_AHTXX(uint8_t address, i2c_inst_t* i2c_type, uint8_t  SDApin, uint8_t  SCLKpin, uint16_t CLKspeed) {
 	_address = address;
 	 i2c = i2c_type; 
-    _SClkPin = SCLKpin;
-    _SDataPin = SDApin;
-    _CLKSpeed = CLKspeed;
+	_SClkPin = SCLKpin;
+	_SDataPin = SDApin;
+	_CLKSpeed = CLKspeed;
 }
 
 /*!
@@ -32,9 +32,9 @@ void LIB_AHTXX::AHT10_InitI2C(ASAIR_I2C_SENSOR_e sensorName) {
 	_sensorName = sensorName;
 	//init I2C
 	gpio_set_function(_SDataPin, GPIO_FUNC_I2C);
-    gpio_set_function(_SClkPin, GPIO_FUNC_I2C);
+	gpio_set_function(_SClkPin, GPIO_FUNC_I2C);
 	gpio_pull_up(_SDataPin);
-    gpio_pull_up(_SClkPin);
+	gpio_pull_up(_SClkPin);
 	i2c_init(i2c, _CLKSpeed * 1000);
 }
 
@@ -305,7 +305,7 @@ uint8_t LIB_AHTXX::AHT10_getBusyBit(bool readI2C) {
 void LIB_AHTXX::AHT10_DeInit()
 {
 	gpio_set_function(_SDataPin, GPIO_FUNC_NULL);
-    gpio_set_function(_SClkPin, GPIO_FUNC_NULL);
+	gpio_set_function(_SClkPin, GPIO_FUNC_NULL);
 	i2c_deinit(i2c); 	
 }
 
