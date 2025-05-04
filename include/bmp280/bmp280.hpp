@@ -9,13 +9,24 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
+#include "hardware/i2c.h"
 #include <cmath> // for pow function
+
+#define BMP280_DEBUG 0
 
 class BMP280_Sensor
 {
 public:
 	BMP280_Sensor(spi_inst_t *spi, uint32_t baudRate, uint8_t cs, uint8_t mosi, uint8_t sck, uint8_t miso);
+	BMP280_Sensor(i2c_inst_t *i2c, uint32_t baudrate, uint32_t timeOutDelay, uint8_t address, uint8_t sda, uint8_t scl);
 	~BMP280_Sensor();
+
+	/*! @brief Communications mode*/
+	enum class CommMode_e : uint8_t
+	{
+		SPI = 0, /**< SPI communication mode */
+		I2C = 1  /**< I2C communication mode */
+	};
 
 	/*! @brief Enumeration for BMP280 power modes */
 	enum class PowerMode_e : uint8_t
@@ -92,17 +103,15 @@ public:
 	struct config_t {
 		/*! @brief Initialize to power-on-reset state. */
 		config_t() : timeSb(StandBy_e::StandBy_MS_1), filter(Filter_e::Filter_OFF), none(0), spi3w_en(0) {}
-
 		uint8_t timeSb    : 3; /**< Inactive duration (standby time) in normal mode. */
 		uint8_t filter    : 3; /**< Filter settings. */
 		uint8_t none      : 1; /**< Unused - don't set. */
 		uint8_t spi3w_en  : 1; /**< Enables 3-wire SPI. */
-
 		/*!
 		 * @brief Retrieve the assembled config register's byte value.
 		 * @return 8-bit register value combining all fields.
 		 */
-		unsigned int get() { return (timeSb << 5) | (filter << 2) | spi3w_en; }
+		uint8_t get() { return (timeSb << 5) | (filter << 2) | spi3w_en; }
 	};
 
 	void InitSensor(void);
@@ -143,26 +152,32 @@ public:
 	double seaLevelForAltitude(double altitude, double atmospheric);
 
 private:
+	i2c_inst_t *_i2cInst;   /**< I2C instance */
+	uint32_t _baudrate;     /**< I2C baudrate */
+	uint32_t _timeOutDelay; /**< I2C timeout delay in uS */
+	uint8_t _address;       /**< I2C address */
 	spi_inst_t *_spiInst;   /**< SPI instance */
-	uint32_t _baudRate;     /**< SPI baudrate */
-	uint8_t _cs;            /**< Chip select pin */
-	uint8_t _mosi;          /**< Master out slave in pin for SPI */
-	uint8_t _sck;           /**< Serial clock pin */
-	uint8_t _miso;          /**< Master in slave out pin */
+	uint32_t _baudRate;     /**< SPI  or I2C baudrate in hertz */
+	static constexpr uint8_t _SPI_COMM_MASK = 0x80; /**< SPI communication mask*/
+	uint8_t _cs;            /**< Chip select pin , SPI Only*/
+	uint8_t _mosi;          /**< Master out slave in pin for SPI, of SDA for I2C */
+	uint8_t _sck;           /**< Serial clock pin , SPI and I2C */
+	uint8_t _miso;          /**< Master in slave out pin , SPI only*/
 
 	uint8_t _chipID;                  /**< Chip ID 0x56-0X58 BMP280 , 0x60 BME280*/
 	uint8_t _temperatureOversampling; /**< Temperature Over sampling */
 	uint8_t _pressureOversampling;    /**< Pressure Over sampling */
 
 	PowerMode_e _powerMode; /**< Power mode of the sensor */
+	CommMode_e _commMode;  /**< Communication mode of the sensor */
 	config_t _configReg;    /**< Configuration register instance */
 
 	int32_t _rawTemperature;  /**< Raw temperature */
 	double _temperature;      /**< Temperature in celsius deg double */
 	int32_t _tFine;
-
 	uint32_t _rawPressure; /**< Raw pressure */
 	double _pressure;      /**< Pressure in Pa */
+	int16_t OverSamplingDelay = 100; /**< Over sampling delay in milliseconds */
 
 	/*! @brief Calibration data structure */
 	/*! @details The calibration data is stored in the chip's memory and is used to correct the raw sensor data. */
@@ -182,6 +197,6 @@ private:
 		int16_t dig_P9;  /**< dig_P9 cal register. */
 	} calib_data_t;
 
-	void getTrimmingParameters(void);
+	bool getTrimmingParameters(void);
 	void StartUpRoutine(void);
 };

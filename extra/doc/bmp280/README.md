@@ -7,7 +7,7 @@
 * Name: BMP280
 * Description: 
 
-Library for Bosch BMP280 Digital pressure sensor hardware SPI.
+Library for Bosch BMP280 Digital pressure sensor hardware SPI or I2C.
 
 * Developed on
 	1. Raspberry pi PICO RP2040
@@ -17,16 +17,23 @@ Library for Bosch BMP280 Digital pressure sensor hardware SPI.
 
 * Supports sensors features:
 
-1. Read pressure
-2. Read temperature
-3. Tested on SPI interface(I2C not implemented yet)
+1. Read pressure data
+2. Read temperature data
+3. Tested on SPI interface and I2C interface
+4. oversampling settings , standby times, Filter settings and can be set thru API.
+5. Normal mode, sleep mode and forced mode supported.
+6. This supports the BMP280 sensor only. The BME280 humidity functionality is not supported.
 
 * [Datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp280-ds001.pdf)
 
 ## Connections
 
-The Sensor uses SPI for communication's.
-Can be set up for any SPI interface and bus speed. 
+The Sensor uses SPI or I2C for communication's.
+
+### SPI Connections
+
+The BMP280 can be connected to the Raspberry Pi Pico using SPI. The following table shows the pin connections between the BMP280 and the Raspberry Pi Pico spi0. 
+The BMP280 is a 3.3V device and the Pico is also a 3.3V device. The BMP280 has a CSB pin which can be connected to any GPIO pin on the Pico. The CSB pin is active low, so it should be pulled high when not in use. Can be set up for any SPI interface and bus speed.
 
 | BMP280 Pin | Function | Pico GPIO | Notes        |
 |------------|----------|-----------|--------------|
@@ -34,6 +41,19 @@ Can be set up for any SPI interface and bus speed.
 | SDA        | MOSI (Data In)   | GPIO 19   | Master Out Slave In |
 | SCL        | SCK (Clock)      | GPIO 18   | SPI Clock |
 | SDO        | MISO (Data Out)  | GPIO 16   | Master In Slave Out | 
+
+### I2C Connections
+
+The BMP280 can be connected to the Raspberry Pi Pico using I2C. The following table shows the pin connections between the BMP280 and the Raspberry Pi Pico I2c1.
+The BMP280 is a 3.3V device and the Pico is also a 3.3V device.
+I2C error timeout and baudrate can be adjusted. The BMP280 has a CSB pin which can be connected to any GPIO pin on the Pico. The CSB pin is active low, so it should be pulled high when not in use. The I2C address of the BMP280 is 0x76 or 0x77 depending on the SDO pin connection.
+
+| BMP280 Pin | Function | Pico GPIO | Notes        |
+|------------|----------|-----------|--------------|
+| SDA        | Data     | GPIO 18   | I2C DATA |
+| SCL        | Clock   | GPIO 19   | I2C Clock |
+| CSB        | Chip Select  | n/a  | pull high |
+| SDO        | MISO   | n/a  | used to select I2C address, If SDO is high then the I2C address is 0x77. If SDO is low the I2C address is 0x76. |
 
 ## Output
 

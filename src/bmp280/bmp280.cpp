@@ -22,53 +22,93 @@ BMP280_Sensor::BMP280_Sensor(spi_inst_t *spi, uint32_t baudRate, uint8_t cs, uin
 	_mosi = mosi;
 	_sck = sck;
 	_miso = miso;
-}
-
-/*! 
-	@brief Init hardware SPI 
-*/
-void BMP280_Sensor::InitSensor(void)
-{
-	gpio_init(_cs);
-	gpio_init(_mosi);
-	gpio_init(_sck);
-	gpio_init(_miso);
-	gpio_set_dir(_cs, true);
-	gpio_put(_cs, true);
-
-	spi_init(_spiInst, _baudRate); // Initialize SPI port 
-
-	// Set SPI format
-	spi_set_format(_spiInst,   // SPI instance
-					8,      // Number of bits per transfer
-					SPI_CPOL_0,      // Polarity (CPOL)
-					SPI_CPHA_0,      // Phase (CPHA)
-					SPI_MSB_FIRST);
-	// Initialize SPI pins : clock and data
-	gpio_set_function(_mosi, GPIO_FUNC_SPI);
-	gpio_set_function(_miso, GPIO_FUNC_SPI);
-	gpio_set_function(_sck, GPIO_FUNC_SPI);
-	
-	StartUpRoutine();
+	_commMode = CommMode_e::SPI;
 }
 
 /*!
- * @brief De-initialize hardware SPI
- * @details De-initialize SPI
+	@brief Constructor.
+	@param i2c Instance of I2C.
+	@param baudrate I2C speed in Hertz
+	@param timeOutDelay I2C timeout delay in micro seconds, uS.
+	@param address I2C address of the sensor. 0x76 or 0x77
+	@param sda Serial data pin.
+	@param scl Serial clock pin.
+*/
+BMP280_Sensor::BMP280_Sensor(i2c_inst_t *i2c, uint32_t baudrate, uint32_t timeOutDelay, uint8_t address, uint8_t sda, uint8_t scl)
+{
+	_i2cInst = i2c;
+	_baudrate = baudrate;
+	_timeOutDelay = timeOutDelay;
+	_address = address;
+	_mosi = sda;
+	_sck = scl;
+	_commMode = CommMode_e::I2C;
+}
+
+/*! 
+	@brief Init hardware
+*/
+void BMP280_Sensor::InitSensor(void)
+{
+
+	if (_commMode == CommMode_e::I2C)
+	{
+		gpio_set_function(_sck, GPIO_FUNC_I2C);
+		gpio_set_function(_mosi, GPIO_FUNC_I2C);
+		gpio_pull_up(_sck);
+		gpio_pull_up(_mosi);
+		i2c_init(_i2cInst, _baudrate); // Initialize I2C port
+	} else {
+		gpio_init(_mosi);
+		gpio_init(_sck);
+		gpio_init(_miso);
+		gpio_init(_cs);
+		gpio_set_dir(_cs, true);
+		gpio_put(_cs, true);
+
+		spi_init(_spiInst, _baudRate); // Initialize SPI port 
+
+		// Set SPI format
+		spi_set_format(_spiInst,   // SPI instance
+						8,      // Number of bits per transfer
+						SPI_CPOL_0,      // Polarity (CPOL)
+						SPI_CPHA_0,      // Phase (CPHA)
+						SPI_MSB_FIRST);
+		// Initialize SPI pins : clock and data
+		gpio_set_function(_mosi, GPIO_FUNC_SPI);
+		gpio_set_function(_miso, GPIO_FUNC_SPI);
+		gpio_set_function(_sck, GPIO_FUNC_SPI);
+	}
+	busy_wait_ms(100); 
+	StartUpRoutine();
+	busy_wait_ms(100);
+}
+
+/*!
+ * @brief De-initialize hardware
 */
 void BMP280_Sensor::DeInitSensor(void)
 {
-	gpio_set_function(_cs, GPIO_FUNC_NULL);
-	gpio_set_dir(_cs, false);
-	gpio_put(_cs, false);
-	gpio_set_function(_mosi, GPIO_FUNC_NULL);
-	gpio_set_function(_sck, GPIO_FUNC_NULL);
-	gpio_set_function(_miso, GPIO_FUNC_NULL);
-	spi_deinit(_spiInst);
-	gpio_deinit(_cs);
-	gpio_deinit(_mosi);
-	gpio_deinit(_sck);
-	gpio_deinit(_miso);
+	if (_commMode == CommMode_e::I2C)
+	{
+		gpio_set_function(_sck, GPIO_FUNC_NULL);
+		gpio_set_function(_mosi, GPIO_FUNC_NULL);
+		gpio_deinit(_sck);
+		gpio_deinit(_mosi);
+		i2c_deinit(_i2cInst);
+	} else {
+		gpio_set_function(_cs, GPIO_FUNC_NULL);
+		gpio_set_dir(_cs, false);
+		gpio_put(_cs, false);
+		gpio_set_function(_mosi, GPIO_FUNC_NULL);
+		gpio_set_function(_sck, GPIO_FUNC_NULL);
+		gpio_set_function(_miso, GPIO_FUNC_NULL);
+		spi_deinit(_spiInst);
+		gpio_deinit(_cs);
+		gpio_deinit(_mosi);
+		gpio_deinit(_sck);
+		gpio_deinit(_miso);
+	}
 }
 
 /*! 
@@ -82,9 +122,7 @@ void BMP280_Sensor::StartUpRoutine(void)
 	getTrimmingParameters();
 	// Set default oversampling.
 	setOversampling(DataType_e::Temperature, sensorSampling_e::Sampling_X16);
-	sleep_ms(100);
 	setOversampling(DataType_e::Pressure, sensorSampling_e::Sampling_X2);
-	sleep_ms(100);
 	setPowerMode(PowerMode_e::Normal);
 }
 
@@ -120,28 +158,58 @@ uint8_t BMP280_Sensor::getChipID() const
 		Function reads 1 or 3 registers of data from sensor.
 	@param reg Type of register.
 	@param threeRegsRead If true, function reads 3 bytes of data from sensor, if false, only 1 byte.
-	@return Value of registers
+	@return Value of registers, will return -1 if I2C error occurs
 */
 int32_t BMP280_Sensor::getData(Registers_e reg, bool threeRegsRead)
 {
 	uint8_t buffer[3] = {0x00, 0x00, 0x00};
 	int32_t result = 0;
 	uint8_t regVal = static_cast<uint8_t>(reg);
-	regVal |= 0x80;
-	uint8_t readRegisterValue = regVal;
-	gpio_put(_cs, false);
-	spi_write_blocking(_spiInst, &readRegisterValue, 1);
-	if (threeRegsRead == true)
+	if (_commMode == CommMode_e::SPI)
 	{
-		spi_read_blocking(_spiInst, 0, buffer, 3);
-		result = (((uint32_t)buffer[0] << 12) | ((uint32_t)buffer[1] << 4) | ((uint32_t)buffer[2] >> 4));
+		regVal |= _SPI_COMM_MASK;
+		gpio_put(_cs, false);
+		spi_write_blocking(_spiInst, &regVal, 1);
+		if (threeRegsRead == true)
+		{
+			spi_read_blocking(_spiInst, 0, buffer, 3);
+			result = (((uint32_t)buffer[0] << 12) | ((uint32_t)buffer[1] << 4) | ((uint32_t)buffer[2] >> 4));
+		}
+		else
+		{
+			spi_read_blocking(_spiInst, 0, &buffer[0], 1);
+			result = buffer[0];
+		}
+		gpio_put(_cs, true);
+	}else{
+		int16_t returnValue = 0;
+		returnValue = i2c_write_timeout_us(_i2cInst, _address, &regVal, 1, true, _timeOutDelay);
+		if (returnValue < 1)
+		{
+			printf("I2C write error: getData %d\n", returnValue);
+			return -1;
+		}
+		if (threeRegsRead == true)
+		{
+			returnValue = i2c_read_timeout_us(_i2cInst, _address, buffer, 3, false, _timeOutDelay);
+			if(returnValue <1)
+			{
+				printf("I2C write error: getData %d\n", returnValue);
+				return -1;
+			}
+			result = (((uint32_t)buffer[0] << 12) | ((uint32_t)buffer[1] << 4) | ((uint32_t)buffer[2] >> 4));
+		}
+		else
+		{
+			returnValue = i2c_read_timeout_us(_i2cInst, _address, &buffer[0], 1, false, _timeOutDelay);
+			if(returnValue <1)
+			{
+				printf("I2C write error: getData %d\n", returnValue);
+				return -1;
+			}
+			result = buffer[0];
+		}
 	}
-	else
-	{
-		spi_read_blocking(_spiInst, 0, &buffer[0], 1);
-		result = buffer[0];
-	}
-	gpio_put(_cs, true);
 	return result;
 }
 
@@ -158,11 +226,25 @@ int32_t BMP280_Sensor::getData(Registers_e reg, bool threeRegsRead)
 bool BMP280_Sensor::setRegister(Registers_e reg, uint8_t config, bool check)
 {
 	uint8_t regVal = static_cast<uint8_t>(reg);
-	uint8_t data[2] = {(regVal &= 0x7F), config};
-	gpio_put(_cs, false);
-	spi_write_blocking(_spiInst, data, 2);
-	gpio_put(_cs, true);
-	
+	uint8_t data[2] = {regVal, config};
+	if (_commMode == CommMode_e::I2C)
+	{
+		int16_t returnValue = 0;
+		returnValue = i2c_write_timeout_us(_i2cInst, _address, data, 2, false, _timeOutDelay);
+		if(returnValue <1)
+		{
+			printf("I2C write error: setRegister%d\n", returnValue);
+			return false;
+		}
+	}
+	else
+	{
+		data[0] = regVal & ~_SPI_COMM_MASK;
+		gpio_put(_cs, false);
+		spi_write_blocking(_spiInst, data, 2);
+		gpio_put(_cs, true);
+	}
+
 	if (check == false)
 	{
 		return true;
@@ -178,16 +260,35 @@ bool BMP280_Sensor::setRegister(Registers_e reg, uint8_t config, bool check)
 /*!
 	@brief Read value of specified register via command.
 	@param reg Type of register.
-	@return Value of specified register.
+	@return Value of specified register., return 0xFF if I2C error occurs
 */
 uint8_t BMP280_Sensor::readRegister(Registers_e reg)
 {
-	uint8_t data[1] = { static_cast<uint8_t>(reg | 0x80) };
 	uint8_t buffer[1] = {0};
-	gpio_put(_cs, false);
-	spi_write_blocking(_spiInst, &data[0], 1);
-	spi_read_blocking(_spiInst, 0, &buffer[0], 1);
-	gpio_put(_cs, true);
+	uint8_t data[1] = {0};
+	if (_commMode == CommMode_e::I2C)
+	{
+		data[0] = static_cast<uint8_t>(reg);
+		int16_t returnValue = 0;
+		returnValue = i2c_write_timeout_us(_i2cInst, _address, data, 1, false, _timeOutDelay);
+		if (returnValue < 1)
+		{
+			printf("I2C write error: readRegister %d\n", returnValue);
+			return 0xFF;
+		}
+		returnValue = i2c_read_timeout_us(_i2cInst, _address, &buffer[0], 1, false, _timeOutDelay);
+		if (returnValue < 1)
+		{
+			printf("I2C read error: readRegister %d\n", returnValue);
+			return 0xFF;
+		}
+	}else{ // SPI
+		data[0] = static_cast<uint8_t>(reg | _SPI_COMM_MASK);
+		gpio_put(_cs, false);
+		spi_write_blocking(_spiInst, &data[0], 1);
+		spi_read_blocking(_spiInst, 0, &buffer[0], 1);
+		gpio_put(_cs, true);
+	}
 	return buffer[0];
 }
 
@@ -199,17 +300,18 @@ uint8_t BMP280_Sensor::readRegister(Registers_e reg)
 */
 bool BMP280_Sensor::setPowerMode(PowerMode_e mode, bool check)
 {
+	static constexpr uint8_t CTRL_MEAS_MASK_PWRMODE = 0xFC; // Bits [1:0] = 00 (mask for power mode)
 	uint8_t config = readRegister(Ctrl_Meas);
 	switch (mode)
-	{// Mask off power mode bits of Ctrl_Meas Register (1 and 0) with 0xFC
+	{
 	case PowerMode_e::Sleep:
-		config = ((config & 0xFC) | 0x00); 
+		config = ((config & CTRL_MEAS_MASK_PWRMODE ) | 0x00); 
 		break;
 	case PowerMode_e::Normal:
-		config = ((config & 0xFC) | 0x03);
+		config = ((config & CTRL_MEAS_MASK_PWRMODE ) | 0x03);
 		break;
 	case PowerMode_e::Forced:
-		config = ((config & 0xFC) | 0x02);
+		config = ((config & CTRL_MEAS_MASK_PWRMODE ) | 0x02);
 		break;
 	}
 	bool value = setRegister(Ctrl_Meas, config, check);
@@ -226,8 +328,9 @@ bool BMP280_Sensor::setPowerMode(PowerMode_e mode, bool check)
 */
 BMP280_Sensor::PowerMode_e BMP280_Sensor::readPowerMode()
 {
+	static constexpr uint8_t CTRL_MEAS_MASK_PWRMODE = 0xFC; // Bits [1:0] = 00 (mask for power mode)
 	uint8_t data = readRegister(Ctrl_Meas);
-	data &= 0x03;
+	data &= ~CTRL_MEAS_MASK_PWRMODE;
 	PowerMode_e mode;
 	switch (data)
 	{
@@ -261,6 +364,8 @@ BMP280_Sensor::PowerMode_e BMP280_Sensor::getPowerMode() const
 */
 bool BMP280_Sensor::setOversampling(DataType_e type, sensorSampling_e oversampling, bool check)
 {
+	static constexpr uint8_t CTRL_MEAS_MASK_T_OS = 0x1F; // Preserve bits [4:0], clear [7:5] (temperature OS)
+	static constexpr uint8_t CTRL_MEAS_MASK_P_OS = 0xE3; // Preserve bits [7:5],[1:0], clear [4:2] (pressure OS)
 	uint8_t registerValue = readRegister(Ctrl_Meas);
 	uint8_t osVal = static_cast<uint8_t>(oversampling);
 
@@ -269,19 +374,17 @@ bool BMP280_Sensor::setOversampling(DataType_e type, sensorSampling_e oversampli
 	{
 		return false;
 	}
-
 	uint8_t value = osVal;
-
 	switch (type)
 	{
 	case DataType_e::Temperature:
 		value <<= 5;
-		registerValue = (registerValue & 0x1F) | value; // Preserve ctrl_meas bits values for temperature oversampling and power mode
+		registerValue = (registerValue & CTRL_MEAS_MASK_T_OS) | value; // Preserve ctrl_meas bits values for temperature oversampling and power mode
 		break;
 
 	case DataType_e::Pressure:
 		value <<= 2;
-		registerValue = (registerValue & 0xE3) | value; // Preserve  ctrl_meas bits values for pressure oversampling and power mode
+		registerValue = (registerValue & CTRL_MEAS_MASK_P_OS) | value; // Preserve  ctrl_meas bits values for pressure oversampling and power mode
 		break;
 	}
 
@@ -298,6 +401,7 @@ bool BMP280_Sensor::setOversampling(DataType_e type, sensorSampling_e oversampli
 			break;
 		}
 	}
+	sleep_ms(OverSamplingDelay);
 	return result;
 }
 
@@ -309,12 +413,14 @@ bool BMP280_Sensor::setOversampling(DataType_e type, sensorSampling_e oversampli
 */
 uint8_t BMP280_Sensor::readOversampling(DataType_e type)
 {
+	static constexpr uint8_t CTRL_MEAS_MASK_P_OS_READ = 0x1C; // Bits [4:2] pressure OS
+	static constexpr uint8_t CTRL_MEAS_MASK_T_OS_READ = 0xE0; // Bits [7:5] temperature OS
 	uint8_t reg = readRegister(Ctrl_Meas);
 	uint8_t result = 0;
 	switch (type)
 	{
 	case DataType_e::Pressure:
-		reg &= 0x1C; // Mask off Bit 4, 3, 2 osrs_p[2:0] Ctrl Meas register
+		reg &=  CTRL_MEAS_MASK_P_OS_READ; // Mask off Bit 4, 3, 2 osrs_p[2:0] Ctrl Meas register
 		reg >>= 2;
 		switch (reg)
 		{
@@ -329,7 +435,7 @@ uint8_t BMP280_Sensor::readOversampling(DataType_e type)
 		return result;
 		break;
 	case DataType_e::Temperature:
-		reg &= 0xE0; // Mask off Bit 7, 6, 5 osrs_t[2:0] Ctrl Meas register
+		reg &= CTRL_MEAS_MASK_T_OS_READ; // Mask off Bit 7, 6, 5 osrs_t[2:0] Ctrl Meas register
 		reg >>= 5;
 		switch (reg)
 		{
@@ -496,15 +602,34 @@ void BMP280_Sensor::reset()
 		calibration data structure. This data is used to calculate temperature
 		and pressure.
 	@note This function should be called after power on reset of BMP280 module.
+	@return True if read was successful., false if I2C error occurs.
 */
-void BMP280_Sensor::getTrimmingParameters()
+bool BMP280_Sensor::getTrimmingParameters()
 {
 	uint8_t reg[1] = {DIG_T1_Reg};
 	uint8_t buffer[24] = {};
-	gpio_put(_cs, false);
-	spi_write_blocking(_spiInst, reg, 1);
-	spi_read_blocking(_spiInst, 0, buffer, 24);
-	gpio_put(_cs, true);
+	if(_commMode == CommMode_e::I2C)
+	{
+		int16_t returnValue = 0;
+		returnValue = i2c_write_timeout_us(_i2cInst, _address, reg, 1, true, _timeOutDelay);
+		if(returnValue < 1)
+		{
+			printf("I2C write error: getTrimmingParameters %d\n", returnValue);
+			return false;
+		}
+		returnValue =  i2c_read_timeout_us(_i2cInst, _address, buffer, 24, true, _timeOutDelay);
+		if(returnValue < 1)
+		{
+			printf("I2C read error: getTrimmingParameters %d\n", returnValue);
+			return false;
+		}
+	}else{
+		gpio_put(_cs, false);
+		spi_write_blocking(_spiInst, reg, 1);
+		spi_read_blocking(_spiInst, 0, buffer, 24);
+		gpio_put(_cs, true);
+	}
+
 	calib_data_t.dig_T1 = (buffer[1] << 8) | buffer[0];
 	calib_data_t.dig_T2 = (buffer[3] << 8) | buffer[2];
 	calib_data_t.dig_T3 = (buffer[5] << 8) | buffer[4];
@@ -517,6 +642,7 @@ void BMP280_Sensor::getTrimmingParameters()
 	calib_data_t.dig_P7 = (buffer[19] << 8) | buffer[18];
 	calib_data_t.dig_P8 = (buffer[21] << 8) | buffer[20];
 	calib_data_t.dig_P9 = (buffer[23] << 8) | buffer[22];
+	return true;
 }
 
 /*!
@@ -528,10 +654,12 @@ bool BMP280_Sensor::readConfig() {
 	_configReg.timeSb = (value >> 5) & 0x07;
 	_configReg.filter = (value >> 2) & 0x07;
 	_configReg.spi3w_en = value & 0x01;
+#ifdef BMP280_DEBUG
 	printf("BMP280 Config Read Register: 0x%02X\n", value);
 	printf("  Standby Time       : 0x%X (%u)\n", _configReg.timeSb, _configReg.timeSb);
 	printf("  Filter Setting     : 0x%X (%u)\n", _configReg.filter, _configReg.filter);
 	printf("  SPI 3-wire enabled : %s\n", _configReg.spi3w_en ? "Yes" : "No");
+#endif
 	return true;
 }
 
@@ -550,12 +678,12 @@ bool BMP280_Sensor::writeConfig(StandBy_e standby, Filter_e filter, bool spi3wEn
 
 	uint8_t value = _configReg.get();
 	bool ok = setRegister(Registers_e::Config, value);
-
+#ifdef BMP280_DEBUG
 	printf("BMP280 Config Register Write: 0x%02X\n", value);
 	printf("  Standby Time      : 0x%X (%u)\n", _configReg.timeSb, _configReg.timeSb);
 	printf("  Filter Setting    : 0x%X (%u)\n", _configReg.filter, _configReg.filter);
 	printf("  SPI 3-wire enabled: %s\n", _configReg.spi3w_en ? "Yes" : "No");
-
+#endif
 	return ok;
 }
 
@@ -606,4 +734,25 @@ bool BMP280_Sensor::takeForcedMeasurement() {
 	return false;
 }
 
+
+/*!
+	@brief Check Connection Function
+		Check if device is on the bus asks for one byte
+	@return int16_t if less than 1 = error 
+*/
+int16_t BMP280_Sensor::CheckConnectionI2C(void)
+{
+	int16_t returnValue = 0;
+	uint8_t rxData = 0;
+	returnValue = i2c_read_timeout_us(_i2cInst, _address , &rxData, 1, false, _timeOutDelay);
+#ifdef BMP280_DEBUG
+	printf("BMP180::CheckConnection. Info \r\n");
+	printf("I2C Return value = %d , RxData =  %u \r\n", returnValue , rxData);
+	if (returnValue >= 1)
+		printf("Connected.\r\n ");
+	else
+		printf("Not Connected. \r\n");	
+#endif
+	return returnValue;
+}
 // ---------------- End of file ----------------

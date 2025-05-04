@@ -23,6 +23,7 @@ add_executable(${PROJECT_NAME}
 
   examples/bmp280/SPI_Normal/main.cpp 
   #examples/bmp280/SPI_Forced/main.cpp 
+  #examples/bmp280/I2C_Normal/main.cpp
 
   #examples/lm35/main.cpp
 

@@ -6,7 +6,6 @@
 
 #include <stdio.h>
 #include "pico/stdlib.h"
-#include "hardware/spi.h"
 #include "bmp280/bmp280.hpp"
 
 #define SPI_PORT spi0 // SPI port spi0 or spi1
