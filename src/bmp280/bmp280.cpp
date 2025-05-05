@@ -369,7 +369,7 @@ bool BMP280_Sensor::setOversampling(DataType_e type, sensorSampling_e oversampli
 	uint8_t registerValue = readRegister(Ctrl_Meas);
 	uint8_t osVal = static_cast<uint8_t>(oversampling);
 
-	// Validate enum range (0x00 to 0x05)
+	//Validate enum range (0x00 to 0x05)__
 	if (osVal > static_cast<uint8_t>(sensorSampling_e::Sampling_X16))
 	{
 		return false;
@@ -394,10 +394,10 @@ bool BMP280_Sensor::setOversampling(DataType_e type, sensorSampling_e oversampli
 		switch (type)
 		{
 		case DataType_e::Temperature:
-			_temperatureOversampling = osVal;
+			_temperatureOversampling = oversampling;
 			break;
 		case DataType_e::Pressure:
-			_pressureOversampling = osVal;
+			_pressureOversampling = oversampling;
 			break;
 		}
 	}
@@ -411,12 +411,12 @@ bool BMP280_Sensor::setOversampling(DataType_e type, sensorSampling_e oversampli
 	@param type Type::Temperature or Type::Pressure.
 	@return Value of the oversampling setting.
 */
-uint8_t BMP280_Sensor::readOversampling(DataType_e type)
+BMP280_Sensor::sensorSampling_e BMP280_Sensor::readOversampling(DataType_e type)
 {
 	static constexpr uint8_t CTRL_MEAS_MASK_P_OS_READ = 0x1C; // Bits [4:2] pressure OS
 	static constexpr uint8_t CTRL_MEAS_MASK_T_OS_READ = 0xE0; // Bits [7:5] temperature OS
 	uint8_t reg = readRegister(Ctrl_Meas);
-	uint8_t result = 0;
+	sensorSampling_e result = sensorSampling_e::Sampling_None;
 	switch (type)
 	{
 	case DataType_e::Pressure:
@@ -424,12 +424,12 @@ uint8_t BMP280_Sensor::readOversampling(DataType_e type)
 		reg >>= 2;
 		switch (reg)
 		{
-			case 0: result = 0; break;
-			case 1: result = 1; break;
-			case 2: result = 2; break;
-			case 3: result = 4; break;
-			case 4: result = 8; break;
-			default: result = 16; break;
+			case 0: result = sensorSampling_e::Sampling_None; break;
+			case 1: result = sensorSampling_e::Sampling_X1; break;
+			case 2: result = sensorSampling_e::Sampling_X2; break;
+			case 3: result = sensorSampling_e::Sampling_X4; break;
+			case 4: result = sensorSampling_e::Sampling_X8; break;
+			default: result = sensorSampling_e::Sampling_X16; break;
 		}
 		_pressureOversampling = result;
 		return result;
@@ -439,22 +439,23 @@ uint8_t BMP280_Sensor::readOversampling(DataType_e type)
 		reg >>= 5;
 		switch (reg)
 		{
-			case 0: result = 0; break;
-			case 1: result = 1; break;
-			case 2: result = 2; break;
-			case 3: result = 4; break;
-			case 4: result = 8; break;
+			case 0: result = sensorSampling_e::Sampling_None; break;
+			case 1: result = sensorSampling_e::Sampling_X1; break;
+			case 2: result = sensorSampling_e::Sampling_X2; break;
+			case 3: result = sensorSampling_e::Sampling_X4; break;
+			case 4: result = sensorSampling_e::Sampling_X8; break;
 			case 5:
 			case 6:
 			case 7:
-				result = 16;
+				result = sensorSampling_e::Sampling_X16;
 				break;
 		}
 		_temperatureOversampling = result;
 		return result;
 		break;
 	default:
-		return 0x00;
+		printf("BMP280_Sensor::readOversampling: Invalid type\n");
+		return sensorSampling_e::Sampling_None;
 		break;
 	}
 }
@@ -464,7 +465,7 @@ uint8_t BMP280_Sensor::readOversampling(DataType_e type)
 	@param type Temperature or Pressure.
 	@return Oversampling config.
 */
-uint8_t BMP280_Sensor::getOversampling(DataType_e type) const
+BMP280_Sensor::sensorSampling_e BMP280_Sensor::getOversampling(DataType_e type) const
 {
 	switch (type)
 	{
@@ -475,7 +476,8 @@ uint8_t BMP280_Sensor::getOversampling(DataType_e type) const
 		return _pressureOversampling;
 		break;
 	default:
-		return 0x00;
+		printf("BMP280_Sensor::getOversampling: Invalid type\n");
+		return sensorSampling_e::Sampling_None;
 		break;
 	}
 }
@@ -581,8 +583,8 @@ double BMP280_Sensor::readPressure(PressureUnit_e unit)
 	@param unit If != 0 method returns pressure in [hPa], returns pressure in [Pa] by default.
 	@return Pressure [Pa] or [hPa] in double.
 */
-	double BMP280_Sensor::getPressure(PressureUnit_e unit) const
-	{
+double BMP280_Sensor::getPressure(PressureUnit_e unit) const
+{
 		return (unit == PressureUnit_e::Pa ? _pressure : (_pressure / 100.0));
 }
 

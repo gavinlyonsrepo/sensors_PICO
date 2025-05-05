@@ -134,8 +134,8 @@ public:
 
 	void reset();
 	bool setOversampling(DataType_e type, sensorSampling_e oversampling, bool check = false);
-	uint8_t readOversampling(DataType_e type);
-	uint8_t getOversampling(DataType_e type) const;
+	sensorSampling_e readOversampling(DataType_e type);
+	sensorSampling_e getOversampling(DataType_e type) const;
 	bool takeForcedMeasurement(void);
 
 	int32_t readRawTemperature();
@@ -165,9 +165,8 @@ private:
 	uint8_t _miso;          /**< Master in slave out pin , SPI only*/
 
 	uint8_t _chipID;                  /**< Chip ID 0x56-0X58 BMP280 , 0x60 BME280*/
-	uint8_t _temperatureOversampling; /**< Temperature Over sampling */
-	uint8_t _pressureOversampling;    /**< Pressure Over sampling */
-
+	sensorSampling_e _temperatureOversampling; /**< Temperature Over sampling */
+	sensorSampling_e _pressureOversampling;    /**< Pressure Over sampling */
 	PowerMode_e _powerMode; /**< Power mode of the sensor */
 	CommMode_e _commMode;  /**< Communication mode of the sensor */
 	config_t _configReg;    /**< Configuration register instance */
