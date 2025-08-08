@@ -22,7 +22,7 @@ note on PICO GPIO 29 is not broken out on PCB.
 
 ## Files
 
-The examples main.cpp contains tests showing library functions
+The example file main.cpp contains tests showing library functions.
 There is also the library files(lm35.cpp and lm35.hpp),
 
 ## Output

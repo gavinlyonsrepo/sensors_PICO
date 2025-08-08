@@ -43,10 +43,10 @@ Can be set up for any I2C interface and bus speed. By default I2C0, GPIO16(SDATA
 
 **Files**
 
-The main.cpp contains tests showing library functions
+The main.cpp contains tests showing library functions.
 There is also an library (ahtxx.cpp and ahtxx.hpp),
 
 **Output**
 
-Data is outputted (eg to a PC) via a USB .
+Data is outputted (eg to a PC) via a USB.
  ![o1](https://github.com/gavinlyonsrepo/STM32_projects/blob/master/extra/images/aht10output.jpg)

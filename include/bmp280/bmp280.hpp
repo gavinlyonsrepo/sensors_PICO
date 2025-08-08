@@ -1,7 +1,6 @@
 /*!
 	@file bmp280.hpp
 	@brief library header file for bmp280 pressure sensor 
-	@todo add I2C support
 */
 
 #pragma once

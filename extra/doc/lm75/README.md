@@ -16,7 +16,7 @@ Features
 ----------------------
  ![mod](https://github.com/gavinlyonsrepo/STM32_projects/blob/master/extra/images/lm75a.jpg)
  
-This is a library for TI LM75A Digital Temperature Sensor and Thermal Watchdog With Two-Wire Interface Temperature Sensor I2C.
+This is a library for the TI LM75A Digital Temperature Sensor and Thermal Watchdog With Two-Wire Interface Temperature Sensor I2C.
 
 1. Shutdown Mode to Minimize Power Consumption
 2. Up to Eight LM75As can be Connected to a Single Bus
@@ -55,13 +55,13 @@ Pins and I2C port(I2C0 or I2C1) can be set in the main.cpp. Default is I2C0 and 
  
 **Files**
 
-The main.cpp contains tests showing library functions
+The main.cpp file contains tests showing library functions
 There is also the library files(LM75A.cpp and LM75A.hpp),
 
 **Output**
 
-Data is outputted  to the PC.
-Switch between the two routines modes by changing define statement in main.cpp 
+Data is outputted to the PC.
+Switch between the two routines modes by changing define statement in main.cpp file. 
 Can also be toggled between Celsius and Fahrenheit. 
  
 1. Basic Usage

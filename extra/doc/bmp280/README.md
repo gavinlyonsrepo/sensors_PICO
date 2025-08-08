@@ -41,7 +41,7 @@ Library for Bosch BMP280 Digital pressure sensor hardware SPI or I2C.
 
 ## Connections
 
-The Sensor uses SPI or I2C for communication's.
+The Sensor uses SPI or I2C for communication with the pico.
 
 ### SPI Connections
 
