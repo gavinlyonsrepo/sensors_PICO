@@ -1,7 +1,9 @@
+# AHTXX
+
 [![Website](https://img.shields.io/badge/Website-Link-blue.svg)](https://gavinlyonsrepo.github.io/)  [![Rss](https://img.shields.io/badge/Subscribe-RSS-yellow.svg)](https://gavinlyonsrepo.github.io//feed.xml)  [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/whitelight976)
 
-Overview
---------------------------------------------
+## Overview
+
 * Name: AHTXX
 * Description: 
 Library for  Aosong ASAIR AHT10, AHT15 & AHT20 Digital Humidity & Temperature Sensor I2C.
@@ -11,11 +13,9 @@ Only tested on AHT10.
 	2. SDK C++ compiler,  arm-none-eabi-g++ (15:10.3)
 	3. CMAKE , VScode
 
-Features
-----------------------
+## Features
 
- ![o](https://github.com/gavinlyonsrepo/STM32_projects/blob/master/extra/images/aht10.jpg)
- 
+![ fmod ](https://github.com/gavinlyonsrepo/sensors_PICO/blob/main/extra/images/aht10.jpg)
 
 Library for Aosong ASAIR AHT10, AHT15 & AHT20 Digital Humidity & Temperature Sensor I2C.
 
@@ -36,17 +36,19 @@ Supports sensors features:
 3. Soft reset with sensor initialization
 4. The library returns an errors if a communication error occurs or if the calibration coefficient is off.
 
-**Connections**
+## Connections
 
 The Sensor uses I2C for communication's. Data is outputted (eg to a PC) via a USB.
 Can be set up for any I2C interface and bus speed. By default I2C0, GPIO16(SDATA) and GPIO17(SCLK) & 100kHz. 
 
-**Files**
+## Files
 
 The main.cpp contains tests showing library functions.
 There is also an library (ahtxx.cpp and ahtxx.hpp),
 
-**Output**
+# Output
 
 Data is outputted (eg to a PC) via a USB.
- ![o1](https://github.com/gavinlyonsrepo/STM32_projects/blob/master/extra/images/aht10output.jpg)
+
+![ op](https://github.com/gavinlyonsrepo/sensors_PICO/blob/main/extra/images/aht10output.jpg)
+ 

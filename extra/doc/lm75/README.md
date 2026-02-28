@@ -1,7 +1,9 @@
+# LM75
+
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/paypalme/whitelight976)
 
-Overview
---------------------------------------------
+## Overview
+
 * Name: LM75A
 * Description: 
 Library for LM75A  temperature sensor
@@ -10,11 +12,11 @@ Library for LM75A  temperature sensor
 	1. Raspberry pi PICO RP2040
 	2. SDK C++ compiler G++ for arm-none-eabi
 	3. CMAKE , VScode
-* Ported from  [STM32 library](https://github.com/gavinlyonsrepo/STM32_projects)
 
-Features
-----------------------
- ![mod](https://github.com/gavinlyonsrepo/STM32_projects/blob/master/extra/images/lm75a.jpg)
+
+## Features
+ 
+![ mod 12](https://github.com/gavinlyonsrepo/sensors_PICO/blob/main/extra/images/lm75a.jpg)
  
 This is a library for the TI LM75A Digital Temperature Sensor and Thermal Watchdog With Two-Wire Interface Temperature Sensor I2C.
 
@@ -48,17 +50,17 @@ Power up mode:
 Pin 3 is the OS (overtemperature shutdown). It can be used to to trigger a pin interrupt.
 Set the functional mode, Tos and Thyst: if that functionally desired.
 
-**Connections**
+## Connections
 
 The Sensor uses I2C for communication's, data is outputted to a PC.
 Pins and I2C port(I2C0 or I2C1) can be set in the main.cpp. Default is I2C0 and GPIO16(data) GPIO17(clock).
  
-**Files**
+## Files
 
 The main.cpp file contains tests showing library functions
 There is also the library files(LM75A.cpp and LM75A.hpp),
 
-**Output**
+## Output
 
 Data is outputted to the PC.
 Switch between the two routines modes by changing define statement in main.cpp file. 
@@ -67,9 +69,9 @@ Can also be toggled between Celsius and Fahrenheit.
 1. Basic Usage
 2. Library test routine
 
-![mod1](https://github.com/gavinlyonsrepo/STM32_projects/blob/master/extra/images/lm75aoutput.jpg)
+![ op1 ](https://github.com/gavinlyonsrepo/sensors_PICO/blob/main/extra/images/lm75aoutput.jpg)
 
-**Datasheet**
+## Datasheet
 
 LM75A data sheets.
  - [Texas Instruments data sheet](http://www.ti.com/lit/ds/symlink/lm75a.pdf)
