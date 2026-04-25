@@ -1,5 +1,6 @@
 # Set minimum required version of CMake
 cmake_minimum_required(VERSION 3.20)
+set(PICO_BOARD pico)
 
 # Include build functions from Pico SDK
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
@@ -27,7 +28,8 @@ add_executable(${PROJECT_NAME}
 
   #examples/lm35/main.cpp
 
-  #examples/lm75/main.cpp
+  #examples/lm75/basic/main.cpp
+  #examples/lm75/test/main.cpp
 
   #examples/ahtxx/main.cpp
 

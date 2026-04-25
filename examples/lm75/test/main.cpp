@@ -1,10 +1,9 @@
 /*!
  * @file main.cpp
- * @brief main test file for lm75 library :: two modes LIB_BASIC or LIB_TEST, see mode select
+ * @brief   test file for lm75 library :: full library test
  * @details This example test file demonstrates the use of the LM75A temperature sensor library.
  *          This example is for the Raspberry Pi Pico  microcontroller.
  * @author Gavin Lyons.
- * @date Sep 2022
  * @link  https://github.com/gavinlyonsrepo/RPI_PICO_projects_list
  */
 
@@ -13,24 +12,12 @@
 #include "pico/stdlib.h"
 #include "lm75/lm75.hpp"
 
-// *** Mode select ***
-// mode 1 or mode 2
-#define LIB_BASIC // Mode 1 :: Basic Usage
-//#define LIB_TEST // Mode 2 :: Full library test example
-
 // *** Globals ***
-LIB_LM75A lm75a(LM75A_DEFAULT_ADDRESS, i2c0, 16, 17, 100);
+// Default I2C address(0x48) for LM75A, can be changed with A0-A2 pins
+uint8_t i2c_address = LM75A_DEFAULT_ADDRESS; 
+LIB_LM75A lm75a(i2c_address, i2c0, 16, 17, 100);
 uint8_t is_connected = 0; // test control
 uint16_t test_count = 0 ;   // test control
-
-#ifdef LIB_BASIC
-bool Temp_type_Celsius = true; // true for Celsius , False  for Farenheit
-bool basic_usage_or_test = true;   // true for basic , false for full library test
-float temperature = 0.0;
-bool is_shutdown = false;
-#endif
-
-#ifdef LIB_TEST
 
 void checkTrueValue(const char *caption, const bool value, const bool expected);
 const char *getFaultQueueValueString(const FaultQueueValue value);
@@ -53,14 +40,14 @@ float newOsTripTemperature = 59.0f;
 FaultQueueValue newFaultQueueValue = FaultQueueValue::NUMBER_OF_FAULTS_6;
 OsPolarity newOsPolarity = OsPolarity::OS_POLARITY_ACTIVEHIGH;
 DeviceMode newDeviceMode = DeviceMode::DEVICE_MODE_INTERRUPT;
-#endif
+
 
 // *** Main ***
 int main()
 {
   stdio_init_all(); // Initialize chosen serial port
   busy_wait_ms(1000);
-  printf("LM75 : Start!\r\n");
+  printf("LM75 Test: Start!\r\n");
   lm75a.initLM75A(); 
   
   // Check for connection
@@ -81,52 +68,9 @@ int main()
   
   while (true)
   {
-    printf("LM75 : Running Test!\r\n");
+    printf("LM75 : Running Tests!\r\n");
     test_count++;
     printf("Test Count :: %u \n", test_count);
-#ifdef LIB_BASIC
-        // Celsius
-        if (Temp_type_Celsius == true)
-    {
-      temperature = lm75a.getTemperature();
-      temperature *= 100;
-      printf("Temperature : %u.%u *C \n", (unsigned int)temperature / 100, (unsigned int)temperature % 100);
-    }
-    else
-    {
-      // Farenheit
-      temperature = lm75a.getTemperatureInFarenheit();
-      temperature *= 1000;
-      printf("Temperature : %u.%u *F \n", (unsigned int)temperature / 1000,
-             (unsigned int)temperature % 100);
-    }
-    // Hysterisis
-    temperature = lm75a.getHysterisisTemperature();
-    temperature *= 100;
-    printf("Hysteris Temperature : %u.%u *C \n", (unsigned int)temperature / 100, (unsigned int)temperature % 100);
-
-    // OS trip temperature
-    temperature = lm75a.getOSTripTemperature();
-    temperature *= 100;
-    printf("OS trip  Temperature : %u.%u *C \n", (unsigned int)temperature / 100, (unsigned int)temperature % 100);
-
-    // Shutdown
-    printf("Shutting Down \n");
-    lm75a.shutdown();
-    is_shutdown = lm75a.isShutdown();
-    printf("is shutdown? %u \n", ((unsigned int)is_shutdown));
-    busy_wait_ms(5000);
-
-    /// Wake up
-    printf("Waking up \n");
-    lm75a.wakeup();
-    is_shutdown = lm75a.isShutdown();
-    printf("is shutdown? %u \n", ((unsigned int)is_shutdown));
-    busy_wait_ms(5000);
-
-#endif // end of LIB_Basic
-
-#ifdef LIB_TEST
     // Test 1 : Test comms
     checkTrueValue("isConnected", lm75a.isConnected(), true);
     busy_wait_ms(1000);
@@ -180,19 +124,15 @@ int main()
     checkTrueValue("shutdown", lm75a.isShutdown(), false);
     busy_wait_ms(2000);
 
-    printf("\nTest Result :: %u\n  ", (uint8_t)testResult);
+    //printf("\nTest Result :: %u\n  ", (uint8_t)testResult);
+    printf("\nTest Result :: %s\n", testResult ? "PASS" : "FAIL");
     while (1)
     {
     }; // stay here :: test over
-#endif // end of Lib TEST
-
   } // end of while forever
 } // *** End  of main ***
 
 // *** Function Space ***
-
-#ifdef LIB_TEST
-
 void checkTrueValue(const char *caption, const bool value, const bool expected)
 {
   bool fail = value != expected;
@@ -322,5 +262,3 @@ void checkFaultQueueValue(const char *caption, const FaultQueueValue value, cons
     printf("%s : %d: PASS \r\n", caption, (uint8_t)expected);
   }
 }
-
-#endif
