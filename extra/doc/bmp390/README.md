@@ -22,7 +22,7 @@ Library for Bosch BMP390 Digital pressure sensor hardware SPI or I2C.
 3. Tested on SPI interface and I2C interface, Interface is selected by user constructor overload(see examples)
 4. Oversampling settings, filter settings and can be set thru API.
 5. Normal mode, sleep mode and forced mode supported.
-6. Chip ID should be for: 0x60
+6. Chip ID read: 0x60
 7. I2C address is 0x76 or 0x77 depending on SDO pin connection.
 8. Supports FIFO and interrupt pin.
 
@@ -48,10 +48,10 @@ Select example you want by modifying the CMakeList.txt file(add_executable(${PRO
 | ------------ | ---------- |
 | SPI_Normal/main.cpp | SPI normal mode |
 | SPI_Forced/main.cpp | SPI forced mode |
-| SPI_Normal_FIFO/main.cpp | SPI normal mode with FIFO & interupt |
+| SPI_Normal_FIFO/main.cpp | SPI normal mode with FIFO buffer & interupt, 640mS |
 | I2C_Normal/main.cpp | I2C normal mode |
 | I2C_Forced/main.cpp | I2C forced mode |
-| I2C_Normal_FIFO/main.cpp | I2C normal mode with FIFO & interupt |
+| I2C_Normal_FIFO/main.cpp | I2C normal mode with FIFO buffer & interupt, 3.2 S |
 
 ## Features
 
@@ -78,7 +78,11 @@ The output data rate (ODR) is the rate at which the sensor updates its output da
 
 ### Interrupt
 
+The BMP390 has an interrupt pin that can be configured to trigger on various events, such as new data available, FIFO watermark reached, or FIFO full. The interrupt pin can be connected to any GPIO pin on the Raspberry Pi Pico and can be used to wake up the Pico from sleep mode or to signal the Pico to read data from the sensor.
+
 ### FIFO
+
+The BMP390 has a FIFO buffer that can store up to 512 bytes of data. The FIFO can be configured to store pressure and temperature data, and can be set to trigger an interrupt when a certain number of bytes are stored in the FIFO (watermark). This allows for efficient data collection without the need for constant polling of the sensor. See the SPI_Normal_FIFO and I2C_Normal_FIFO examples for how to use the FIFO feature.
 
 ## Connections
 
@@ -118,10 +122,10 @@ I2C error timeout and baud rate can be adjusted. The BMP390 has a CSB pin which 
 
 ## Debug Mode
 
-Setting BMP390_DEBUG to 1 in the header file will enable verbose debug output during development. This can help with troubleshooting and understanding the sensor's behavior. When BMP390_DEBUG is set to 0, the library will operate in normal mode without verbose debug output.
+Setting BMP390_DEBUG to 1 in the header file will enable verbose debug output during development. This can help with troubleshooting and understanding the sensor's behavior. When BMP390_DEBUG is set to 0, the library will operate in normal mode with less verbose output.
 
 ## Output
 
-Data is outputted (eg to a PC) via a USB.
+In example files data is outputted (eg to a PC) via a USB, 38400 Uart baud rate connection.
 
  ![ op](https://github.com/gavinlyonsrepo/sensors_PICO/blob/main/extra/images/bmp390output.png)
