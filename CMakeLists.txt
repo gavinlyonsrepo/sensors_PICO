@@ -26,6 +26,13 @@ add_executable(${PROJECT_NAME}
   #examples/bmp280/SPI_Forced/main.cpp 
   #examples/bmp280/I2C_Normal/main.cpp
 
+  #examples/bmp390/SPI_Normal/main.cpp 
+  #examples/bmp390/SPI_Forced/main.cpp
+  #examples/bmp390/SPI_Normal_FIFO/main.cpp
+  #examples/bmp390/I2C_Normal/main.cpp
+  #examples/bmp390/I2C_Forced/main.cpp
+  #examples/bmp390/I2C_Normal_FIFO/main.cpp
+
   #examples/lm35/main.cpp
 
   #examples/lm75/basic/main.cpp
@@ -43,6 +50,7 @@ add_library(pico_sensors INTERFACE)
 
 target_sources(pico_sensors INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/src/bmp280/bmp280.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/src/bmp390/bmp390.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/lm35/lm35.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/lm75/lm75.cpp
   ${CMAKE_CURRENT_LIST_DIR}/src/ahtxx/ahtxx.cpp

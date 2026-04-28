@@ -35,3 +35,4 @@ C++ Library to support sensors for the Raspberry PI PICO. [URL project github li
 |DHT11| Humidity | GPIO | [Readme](extra/doc/dht11/README.md)|
 |AHT10| Humidity | I2C | [Readme](extra/doc/ahtxx/README.md)|
 |BMP280 | Pressure | SPI or I2C | [Readme](extra/doc/bmp280/README.md)|
+|BMP390 | Pressure | SPI or I2C | [Readme](extra/doc/bmp390/README.md)|
