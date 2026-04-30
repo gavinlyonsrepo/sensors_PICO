@@ -30,7 +30,7 @@
 
 // ---- Application settings ----
 #define LOCAL_PRESSURE  1025.25   // Replace with today's QNH from forecast [hPa]
-// ---- FIFO configuration ------------------------------------------------
+// ---- FIFO configuration ----
 // Frame size breakdown (pressure + temperature frame, datasheet Table 15):
 //   1 header byte + 3 temperature bytes + 3 pressure bytes = 7 bytes/frame
 //
@@ -51,6 +51,9 @@
 
 BMP390_Sensor bmp390(I2C_PORT, I2C_BAUDRATE, I2C_TIMEOUT_US, I2C_ADDRESS, SDA, SCL);
 
+void SetupInterruptPin(void);
+void DeinitInterruptPin(void);
+
 int main()
 {
 	stdio_init_all();
@@ -58,9 +61,7 @@ int main()
 	printf("\n--- START BMP390 I2C FIFO + Interrupt ---\n");
 
 	// ---- Initialise INT GPIO input ----
-	gpio_init(INT_PIN);
-	gpio_set_dir(INT_PIN, GPIO_IN);
-	gpio_pull_down(INT_PIN); // keep defined when INT is de-asserted (active-high mode)
+	SetupInterruptPin();
 
 	// ---- Initialise sensor ----
 	// Optional: check device is on the bus before full initialisation
@@ -172,5 +173,19 @@ int main()
 	bmp390.disableFifo();
 	bmp390.flushFifo();
 	bmp390.DeInitSensor();
+	DeinitInterruptPin();
 	printf("--- END ---\n");
+}
+
+void SetupInterruptPin()
+{
+	gpio_init(INT_PIN);
+	gpio_set_dir(INT_PIN, GPIO_IN);
+	gpio_pull_down(INT_PIN); // keep defined when INT is de-asserted (active-high mode)
+}
+
+void DeinitInterruptPin()
+{
+	gpio_set_function(INT_PIN, GPIO_FUNC_NULL);
+	gpio_deinit(INT_PIN);
 }

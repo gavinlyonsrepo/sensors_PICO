@@ -42,6 +42,9 @@
 
 BMP390_Sensor bmp390(SPI_PORT, SPI_BAUDRATE, CS, MOSI, SCK, MISO);
 
+void SetupInterruptPin(void);
+void DeinitInterruptPin(void);
+
 int main()
 {
 	stdio_init_all();
@@ -49,9 +52,7 @@ int main()
 	printf("\n--- START BMP390 SPI FIFO + Interrupt ---\n");
 
 	// ---- Initialise INT GPIO input ----
-	gpio_init(INT_PIN);
-	gpio_set_dir(INT_PIN, GPIO_IN);
-	gpio_pull_down(INT_PIN); // keep defined when INT is de-asserted (active-high mode)
+	SetupInterruptPin();
 
 	// ---- Initialise sensor ----
 	bmp390.InitSensor();
@@ -145,5 +146,19 @@ int main()
 	bmp390.disableFifo();
 	bmp390.flushFifo();
 	bmp390.DeInitSensor();
+	DeinitInterruptPin();
 	printf("--- END ---\n");
+}
+
+void SetupInterruptPin()
+{
+	gpio_init(INT_PIN);
+	gpio_set_dir(INT_PIN, GPIO_IN);
+	gpio_pull_down(INT_PIN); // keep defined when INT is de-asserted (active-high mode)
+}
+
+void DeinitInterruptPin()
+{
+	gpio_set_function(INT_PIN, GPIO_FUNC_NULL);
+	gpio_deinit(INT_PIN);
 }
