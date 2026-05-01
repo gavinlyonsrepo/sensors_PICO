@@ -48,7 +48,7 @@ Select example you want by modifying the CMakeList.txt file(add_executable(${PRO
 | ------------ | ---------- |
 | SPI_Normal/main.cpp | SPI normal mode |
 | SPI_Forced/main.cpp | SPI forced mode |
-| SPI_Normal_FIFO/main.cpp | SPI normal mode with FIFO buffer & interupt, 640mS |
+| SPI_Normal_FIFO/main.cpp | SPI normal mode with FIFO buffer & interupt, 560mS |
 | I2C_Normal/main.cpp | I2C normal mode |
 | I2C_Forced/main.cpp | I2C forced mode |
 | I2C_Normal_FIFO/main.cpp | I2C normal mode with FIFO buffer & interupt, 3.2 S |
@@ -84,6 +84,23 @@ The BMP390 has an interrupt pin that can be configured to trigger on various eve
 
 The BMP390 has a FIFO buffer that can store up to 512 bytes of data. The FIFO can be configured to store pressure and temperature data, and can be set to trigger an interrupt when a certain number of bytes are stored in the FIFO (watermark). This allows for efficient data collection without the need for constant polling of the sensor. See the SPI_Normal_FIFO and I2C_Normal_FIFO examples for how to use the FIFO feature.
 
+The BMP390 has a FIFO buffer that can store up to 512 bytes of data. The FIFO can be configured to store pressure and temperature data, and can be set to trigger an interrupt when a certain number of bytes are stored in the FIFO (watermark). This allows for efficient data collection without the need for constant polling of the sensor. See the SPI_Normal_FIFO and I2C_Normal_FIFO examples for how to use the FIFO feature.
+
+The calculation for the interrupt time is:
+
+1. Size of FIFO Buffer = 512 bytes
+2. Bytes per frame = 7 bytes
+3. Frame-watermark is defined by user in example file
+4. ODR period is defined by the ODR set, the available values are in datasheet or ODR-e enum. default 20mS
+5. Max frames = Size Of FIFO/bytes per frame
+6. Frame watermark/bytes per frame = frames per_read
+7. Interrupt time = frames per_read * ODR period.
+
+| Example file | ODR period | Frame_watermark | interrupt time |
+| ---- | --- | --- | --- |
+| I2C_Normal_FIFO | ODR_50_Hz   20 mS | 200 | 560 mS |
+| SPI_Normal_FIFO | ODR_1_5_Hz 640 mS | 35 | 3.2 S |
+
 ## Connections
 
 The Sensor uses SPI or I2C for communication with the pico.
@@ -93,7 +110,7 @@ Some BMP390 breakout modules can be powered off 5 Volts. Check your module speci
 ### SPI Connections
 
 The BMP390 can be connected to the Raspberry Pi Pico using SPI. The following table shows the pin connections between the BMP390 and the Raspberry Pi Pico spi0.
-The BMP390 has a CS pin which can be connected to any GPIO pin on the Pico. The CSB pin is active low, so it should be pulled high when not in use. Can be set up for any SPI interface and bus speed.
+The BMP390 has a CS pin which can be connected to any GPIO pin on the Pico. Can be set up for any SPI interface and bus speed.
 
 | BMP390 Pin | Function | Pico GPIO | Notes |
 | ---- | ---- | --- | ---- |
@@ -108,7 +125,7 @@ The BMP390 has a CS pin which can be connected to any GPIO pin on the Pico. The 
 ### I2C Connections
 
 The BMP390 can be connected to the Raspberry Pi Pico using I2C. The following table shows the pin connections between the BMP390 and the Raspberry Pi Pico I2c1.
-I2C error timeout and baud rate can be adjusted. The BMP390 has a CSB pin which can be connected to any GPIO pin on the Pico. The CSB pin is active low, so it should be pulled high when not in use. The I2C address of the BMP390 is 0x76 or 0x77 depending on the SDO pin connection.
+I2C error timeout and baud rate can be adjusted. The BMP390 has a CSB pin , it should be pulled high. The I2C address of the BMP390 is 0x76 or 0x77 depending on the SDO pin connection.
 
 | BMP390 Pin | Function | Pico GPIO | Notes |
 | ---- | ---- | ---- | ---- |
