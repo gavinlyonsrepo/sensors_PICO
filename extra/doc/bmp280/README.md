@@ -2,6 +2,15 @@
 
 ![ Pinout](https://github.com/gavinlyonsrepo/sensors_PICO/blob/main/extra/images/bmp280.jpg)
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Default Settings](#default-settings)
+- [Connections](#connections)
+  - [SPI Connections](#spi-connections)
+  - [I2C Connections](#i2c-connections)
+- [Output](#output)
+
 ## Overview
 
 * Name: BMP280
@@ -29,7 +38,6 @@ Library for Bosch BMP280 Digital pressure sensor hardware SPI or I2C.
 * [Datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bmp280-ds001.pdf)
 
 ## Default settings
-
 
 | BMP280 Setting | Default Enumeration |
 |------------|----------|

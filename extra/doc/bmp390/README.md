@@ -2,6 +2,24 @@
 
 ![ Pinout](https://github.com/gavinlyonsrepo/sensors_PICO/blob/main/extra/images/bmp390.png)
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Default Settings](#default-settings)
+- [Examples](#examples)
+- [Features](#features)
+  - [Power Modes](#power-modes)
+  - [Filter Settings](#filter-settings)
+  - [Oversampling Settings](#oversampling-settings)
+  - [Output Data Rate (ODR)](#output-data-rate-odr)
+  - [Interrupt](#interrupt)
+  - [FIFO](#fifo)
+- [Connections](#connections)
+  - [SPI Connections](#spi-connections)
+  - [I2C Connections](#i2c-connections)
+- [Debug Mode](#debug-mode)
+- [Output](#output)
+
 ## Overview
 
 * Name: BMP390
@@ -81,8 +99,6 @@ The output data rate (ODR) is the rate at which the sensor updates its output da
 The BMP390 has an interrupt pin that can be configured to trigger on various events, such as new data available, FIFO watermark reached, or FIFO full. The interrupt pin can be connected to any GPIO pin on the Raspberry Pi Pico and can be used to wake up the Pico from sleep mode or to signal the Pico to read data from the sensor.
 
 ### FIFO
-
-The BMP390 has a FIFO buffer that can store up to 512 bytes of data. The FIFO can be configured to store pressure and temperature data, and can be set to trigger an interrupt when a certain number of bytes are stored in the FIFO (watermark). This allows for efficient data collection without the need for constant polling of the sensor. See the SPI_Normal_FIFO and I2C_Normal_FIFO examples for how to use the FIFO feature.
 
 The BMP390 has a FIFO buffer that can store up to 512 bytes of data. The FIFO can be configured to store pressure and temperature data, and can be set to trigger an interrupt when a certain number of bytes are stored in the FIFO (watermark). This allows for efficient data collection without the need for constant polling of the sensor. See the SPI_Normal_FIFO and I2C_Normal_FIFO examples for how to use the FIFO feature.
 
